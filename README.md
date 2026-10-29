@@ -6,7 +6,7 @@
 
 ### *Locally Powered Algorithmic Document Verification & Fraud Screening Terminal*
 
-[![SIH 2024](https://img.shields.io/badge/Smart%20India%20Hackathon-2024-f59e0b?style=for-the-badge&logo=target)](https://sih.gov.in/)
+[![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-f59e0b?style=for-the-badge&logo=target)](https://sih.gov.in/)
 [![Team](https://img.shields.io/badge/Team-VibexLeapers-3b82f6?style=for-the-badge)](https://github.com/XyerO0/VeriScan)
 [![Python](https://img.shields.io/badge/Python-3.10%20|%203.11%20|%203.12-blue?style=for-the-badge&logo=python)](https://python.org)
 [![Framework](https://img.shields.io/badge/Backend-Flask%203.x-10b981?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
@@ -268,7 +268,7 @@ projectAlpha/
 
 ## Team & Hackathon Information
 
-* **Competition**: Smart India Hackathon (SIH) 2024
+* **Competition**: Smart India Hackathon (SIH) 2026
 * **Team**: VibexLeapers
 * **Domain**: AI / Computer Vision / Document Security
 * **Repository**: [https://github.com/XyerO0/VeriScan](https://github.com/XyerO0/VeriScan)
