@@ -6,7 +6,7 @@
 
 ### *Locally Powered Algorithmic Document Verification & Fraud Screening Terminal*
 
-[![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-f59e0b?style=for-the-badge&logo=target)](https://sih.gov.in/)
+[![License](https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge)](LICENSE)
 [![Team](https://img.shields.io/badge/Team-VibexLeapers-3b82f6?style=for-the-badge)](https://github.com/XyerO0/VeriScan)
 [![Python](https://img.shields.io/badge/Python-3.10%20|%203.11%20|%203.12-blue?style=for-the-badge&logo=python)](https://python.org)
 [![Framework](https://img.shields.io/badge/Backend-Flask%203.x-10b981?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
@@ -21,7 +21,7 @@
 
 > **"A locally powered algorithmic system for preliminary screening of identity documents and identification of potentially suspicious indicators."**
 > 
-> *VeriScan is a rapid-response, client-free screening tool designed for the Smart India Hackathon (SIH). It performs pixel-level image forensics and deterministic rule validation in-memory. It does not interface with government databases and does not claim 100% legal authenticity determination.*
+> *VeriScan is a rapid-response, client-free screening tool for preliminary document analysis. It performs pixel-level image forensics and deterministic rule validation in-memory. It does not interface with government databases and does not claim 100% legal authenticity determination.*
 
 ---
 
@@ -266,11 +266,11 @@ projectAlpha/
 
 ---
 
-## Team & Hackathon Information
+## Project & Team Information
 
-* **Competition**: Smart India Hackathon (SIH) 2026
+* **Project**: VeriScan Forensic Screening System
 * **Team**: VibexLeapers
-* **Domain**: AI / Computer Vision / Document Security
+* **Domain**: Computer Vision / Document Forensics / Identity Security
 * **Repository**: [https://github.com/XyerO0/VeriScan](https://github.com/XyerO0/VeriScan)
 
 ---
