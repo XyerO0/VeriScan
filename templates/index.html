@@ -3,50 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Verification System</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta name="color-scheme" content="dark">
+  <title>VeriScan — Industrial Forensic Screening Terminal</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4.0">
 </head>
 <body>
 
+  <!-- Console Navigation -->
   <header class="navbar">
     <div class="container">
-      <span class="logo">📄 VeriScan</span>
-      <nav>
-        <a href="{{ url_for('home') }}" class="active">Home</a>
-        <a href="{{ url_for('verify') }}">Verify Document</a>
-      </nav>
+      <a href="{{ url_for('home') }}" class="logo-group">
+        <div class="logo-icon-box">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <span class="logo-text">VeriScan</span>
+        <span class="logo-tag">FORENSIC ENGINE</span>
+      </a>
+
+      <div class="nav-actions">
+        <div class="system-status">
+          <span class="status-dot active"></span>
+          <span>LOCAL ENGINE READY</span>
+        </div>
+        <a href="{{ url_for('home') }}" class="nav-link active">Console</a>
+        <a href="{{ url_for('verify') }}" class="nav-link">Screening Terminal</a>
+        <a href="{{ url_for('verify') }}" class="btn btn-primary" style="padding: 7px 14px; font-size: 12px;">
+          <span>Launch Ingest</span>
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
     </div>
   </header>
 
-  <main class="container" style="margin-top: 60px;">
-    <div class="hero">
-      <h1>AI‑Powered Document Verification</h1>
-      <p class="subtitle">
-        Upload your PAN, Aadhaar, or Visa document to instantly check authenticity
-        and detect potential fraud.
-      </p>
-      <a href="{{ url_for('verify') }}" class="btn primary-btn">Get Started →</a>
-    </div>
+  <!-- Hero Console -->
+  <main>
+    <section class="hero-section">
+      <div class="container">
+        <div class="telemetry-tag">
+          <span class="status-dot warn"></span>
+          <span>SIH '24 SPECIFICATION • TEAM VIBEXLEAPERS</span>
+        </div>
+        <h1 class="hero-title">
+          Identity Document &amp; Forensic<br>
+          Tampering Screening Terminal
+        </h1>
+        <p class="hero-subtitle">
+          High-precision, local preliminary screening for physical and digital identity credentials. Combines optical character extraction with multi-matrix Error Level Analysis (ELA) and Laplacian variance profiling to flag document anomalies without cloud dependencies.
+        </p>
 
-    <div class="features-grid">
-      <div class="feature-card">
-        <h3>🔍 OCR Extraction</h3>
-        <p>Automatically reads document number and name from the image.</p>
+        <div class="hero-actions">
+          <a href="{{ url_for('verify') }}" class="btn btn-primary" style="font-size: 14px; padding: 12px 24px;">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
+            <span>Open Ingest Terminal</span>
+          </a>
+          <a href="#specifications" class="btn btn-secondary" style="font-size: 14px; padding: 12px 22px;">
+            <span>Architecture &amp; Specs</span>
+          </a>
+        </div>
+
+        <div class="telemetry-row">
+          <div class="telemetry-block">
+            <span class="telemetry-block-label">EXECUTION LATENCY</span>
+            <div class="telemetry-block-val">&lt; 120ms In-Memory</div>
+          </div>
+          <div class="telemetry-block">
+            <span class="telemetry-block-label">AIR-GAP ISOLATION</span>
+            <div class="telemetry-block-val">Zero Cloud / 100% Local</div>
+          </div>
+          <div class="telemetry-block">
+            <span class="telemetry-block-label">DIMENSIONAL STANDARD</span>
+            <div class="telemetry-block-val">ISO/IEC 7810 ID-1</div>
+          </div>
+          <div class="telemetry-block">
+            <span class="telemetry-block-label">ANALYSIS ENGINES</span>
+            <div class="telemetry-block-val">OpenCV 4.x + Tesseract</div>
+          </div>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>✅ Smart Validation</h3>
-        <p>Checks format, compares entered vs. extracted data, and calculates name similarity.</p>
+    </section>
+
+    <!-- Architecture & Document Specification Matrix -->
+    <section class="spec-section" id="specifications">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-eyebrow">INSPECTION PIPELINE MATRIX</div>
+          <h2 class="section-title">Multi-Stage Algorithmic Screening Architecture</h2>
+        </div>
+
+        <div class="spec-grid">
+          <div class="spec-card">
+            <div class="spec-card-num">CORE 01 // SYNTAX &amp; OCR</div>
+            <h3 class="spec-card-title">Multi-Engine OCR &amp; Regex Validation</h3>
+            <p class="spec-card-desc">Deterministic verification of alphanumeric identifiers against official PAN, Aadhaar, and Visa syntax with localized grayscale thresholding and fuzzy Levenshtein name matching.</p>
+          </div>
+
+          <div class="spec-card">
+            <div class="spec-card-num">CORE 02 // COMPRESSION MATRIX</div>
+            <h3 class="spec-card-title">Error Level Analysis (ELA)</h3>
+            <p class="spec-card-desc">Performs 90% recompression delta analysis across 4x4 matrix sectors, isolating compression variance to detect digitally spliced text, pasted headshots, and altered numbers.</p>
+          </div>
+
+          <div class="spec-card">
+            <div class="spec-card-num">CORE 03 // SPATIAL SPLICING</div>
+            <h3 class="spec-card-title">3x3 Laplacian Variance Grid</h3>
+            <p class="spec-card-desc">Spatially partitioned high-frequency gradient inspection flags sharp digital text overlays spliced onto degraded, printed, or low-resolution scanned document surfaces.</p>
+          </div>
+
+          <div class="spec-card">
+            <div class="spec-card-num">CORE 04 // METADATA &amp; GEOMETRY</div>
+            <h3 class="spec-card-title">Aspect Ratio &amp; EXIF Forensic Audit</h3>
+            <p class="spec-card-desc">Measures physical bounding proportions against ISO/IEC 7810 standards (1.586 target ratio) and probes binary image headers for Photoshop, GIMP, or Canva software signatures.</p>
+          </div>
+        </div>
+
+        <!-- Technical Specification Matrix Table -->
+        <div class="technical-table-card">
+          <div class="table-head">
+            <span>DOCUMENT SPECIFICATION REFERENCE MATRIX</span>
+            <span class="mono" style="font-size: 11px; color: var(--accent);">V2.4 SPEC</span>
+          </div>
+          <table class="tech-table">
+            <thead>
+              <tr>
+                <th>Document Classification</th>
+                <th>Standard Format</th>
+                <th>Identifier Regex</th>
+                <th>Target Aspect Ratio</th>
+                <th>Primary Tamper Vectors</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600; color: var(--text);">Indian PAN Card</td>
+                <td>Income Tax Department (10-char)</td>
+                <td class="code-cell">^[A-Z]{5}[0-9]{4}[A-Z]{1}$</td>
+                <td class="mono">1.586 (85.60 × 53.98 mm)</td>
+                <td>Digit replacement, 4th character entity spoofing</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--text);">Aadhaar Card</td>
+                <td>UIDAI Standard (12-digit)</td>
+                <td class="code-cell">^[2-9]{1}[0-9]{3}\s?[0-9]{4}\s?[0-9]{4}$</td>
+                <td class="mono">1.586 (ID-1 / Cutout)</td>
+                <td>Photo splicing, Verhoeff checksum failure</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--text);">Travel Visa Document</td>
+                <td>Standard Visa Identifier</td>
+                <td class="code-cell">^[A-Z0-9]{7,10}$</td>
+                <td class="mono">1.414 (ISO 216 / A6)</td>
+                <td>Expiration stamp alteration, digital font mismatch</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="disclaimer-bar">
+          <strong>TECHNICAL CLARIFICATION:</strong> VeriScan is an algorithmic preliminary screening system built for the Smart India Hackathon (SIH). It evaluates compression variance, structural ratios, and format compliance in a local in-memory environment. It does not perform government database queries or certify legal document authenticity.
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>⚠️ Risk Assessment</h3>
-        <p>Provides a risk score and level (Low / Medium / High) based on multiple checks.</p>
-      </div>
-    </div>
+    </section>
   </main>
 
+  <!-- Console Footer -->
   <footer>
-    <div class="container">
-      <p>&copy; 2025 VeriScan – Secure Document Verification</p>
+    <div class="container footer-inner">
+      <div>&copy; 2026 VeriScan Console • Team VibexLeapers • Smart India Hackathon MVP</div>
+      <div class="mono" style="font-size: 11px; color: var(--text-dim);">STATELESS IN-MEMORY PIPELINE • ZERO PERSISTENT DATABASE</div>
     </div>
   </footer>
 

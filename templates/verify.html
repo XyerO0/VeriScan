@@ -4,146 +4,343 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify Document</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta name="color-scheme" content="dark">
+  <title>Screening Terminal — VeriScan Forensic Console</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4.0">
 </head>
 
 <body>
 
+  <!-- Console Navigation -->
   <header class="navbar">
     <div class="container">
-      <span class="logo">📄 VeriScan</span>
-      <nav>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('verify') }}" class="active">Verify Document</a>
-      </nav>
+      <a href="{{ url_for('home') }}" class="logo-group">
+        <div class="logo-icon-box">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <span class="logo-text">VeriScan</span>
+        <span class="logo-tag">FORENSIC ENGINE</span>
+      </a>
+
+      <div class="nav-actions">
+        <div class="system-status">
+          <span class="status-dot active"></span>
+          <span>LOCAL ENGINE READY</span>
+        </div>
+        <a href="{{ url_for('home') }}" class="nav-link">Console</a>
+        <a href="{{ url_for('verify') }}" class="nav-link active">Screening Terminal</a>
+      </div>
     </div>
   </header>
 
   <main class="container">
-    <div class="verify-wrapper">
-      <!-- Left Column: Form -->
-      <section class="form-section">
-        <h2>Enter Document Details</h2>
-        <form id="verifyForm" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="documentType">Document Type *</label>
-            <select id="documentType" name="documentType" required>
-              <option value="">-- Select --</option>
-              <option value="pan">PAN Card</option>
-              <option value="aadhaar">Aadhaar</option>
-              <option value="visa">Visa</option>
-            </select>
+    <div class="console-layout">
+
+      <!-- Left Column: Input Studio -->
+      <section class="console-panel">
+        <div class="panel-bar">
+          <div class="panel-heading">
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="22" y1="12" x2="18" y2="12"/>
+              <line x1="6" y1="12" x2="2" y2="12"/>
+              <line x1="12" y1="6" x2="12" y2="2"/>
+              <line x1="12" y1="22" x2="12" y2="18"/>
+            </svg>
+            <span>DOCUMENT INGEST &amp; PARAMETERS</span>
           </div>
-
-          <div class="form-group">
-            <label for="name">Full Name (as on document) *</label>
-            <input type="text" id="name" name="name" placeholder="e.g. Rahul Kumar" required>
-          </div>
-
-          <div class="form-group">
-            <label for="document" id="documentLabel">Document Number *</label>
-            <input type="text" id="document" name="document" placeholder="Enter document number" required>
-          </div>
-
-          <div class="form-group">
-            <label for="documentFile">Upload Document Image *</label>
-            <input type="file" id="documentFile" name="documentFile" accept=".jpg,.jpeg,.png" required>
-            <small class="hint">Supported: JPG, JPEG, PNG (max 5 MB)</small>
-          </div>
-
-          <button type="submit" class="btn primary-btn" id="submitBtn">Verify Document</button>
-        </form>
-        <div id="errorMessage" class="error-message hidden"></div>
-      </section>
-
-      <!-- Right Column: Results -->
-      <section class="results-section" id="resultsSection">
-        <div id="resultPlaceholder">
-          <p>📎 Upload a document and click <strong>Verify</strong> to see results here.</p>
+          <span class="panel-meta">INPUT_STAGE // READY</span>
         </div>
 
-        <div id="resultContent" class="hidden">
-          <h3>Verification Results</h3>
-
-          <!-- Risk -->
-          <div class="result-card risk-card">
-            <div class="risk-header">
-              <span class="label">Risk Level</span>
-              <span id="riskLevel" class="badge">--</span>
-            </div>
-            <div class="risk-score">
-              <span>Score</span>
-              <strong id="riskScore">--</strong>
-            </div>
+        <div class="panel-body">
+          <!-- Quick Demo Fixtures for Judges -->
+          <div class="fixture-row">
+            <span class="fixture-label">FIXTURES:</span>
+            <button type="button" class="fixture-btn" id="presetPan">PAN (Valid)</button>
+            <button type="button" class="fixture-btn" id="presetAadhaar">Aadhaar (Sample)</button>
+            <button type="button" class="fixture-btn" id="presetVisa">Visa (Sample)</button>
           </div>
 
-          <!-- Document -->
-          <div class="result-card">
-            <h4>Document Check</h4>
-            <div class="result-row">
-              <span>Entered Number</span>
-              <span id="enteredNumber">--</span>
+          <form id="verifyForm" method="POST" action="/verify" enctype="multipart/form-data">
+            <!-- Document Classification -->
+            <div class="field">
+              <label for="documentType" class="field-label">
+                <span>DOCUMENT CLASSIFICATION</span>
+                <span class="req">REQUIRED</span>
+              </label>
+              <select id="documentType" name="documentType" class="select-control" required>
+                <option value="">-- Select Document Standard --</option>
+                <option value="pan" {% if docType == 'pan' %}selected{% endif %}>Indian PAN Card (ITD 10-Char)</option>
+                <option value="aadhaar" {% if docType == 'aadhaar' %}selected{% endif %}>Aadhaar Card (UIDAI 12-Digit)</option>
+                <option value="visa" {% if docType == 'visa' %}selected{% endif %}>Travel Visa Document</option>
+              </select>
             </div>
-            <div class="result-row">
-              <span>Detected Number</span>
-              <span id="detectedNumber">--</span>
+
+            <!-- Claimed Full Name -->
+            <div class="field">
+              <label for="name" class="field-label">
+                <span>CLAIMED FULL NAME</span>
+                <span class="req">REQUIRED</span>
+              </label>
+              <input type="text" id="name" name="name" class="input-control" placeholder="e.g. Rahul Kumar" value="{{ name if name else '' }}" required>
             </div>
-            <div class="result-row">
-              <span>Number Match</span>
-              <span id="numberMatch" class="status-badge">--</span>
+
+            <!-- Document Identifier -->
+            <div class="field">
+              <label for="document" id="documentLabel" class="field-label">
+                <span>DOCUMENT IDENTIFIER #</span>
+                <span class="req">REQUIRED</span>
+              </label>
+              <input type="text" id="document" name="document" class="input-control mono" placeholder="Enter alphanumeric identifier" value="{{ document if document else '' }}" required>
             </div>
-            <div class="result-row">
-              <span>Format Valid</span>
-              <span id="formatValid" class="status-badge">--</span>
+
+            <!-- Drag & Drop File Upload Area -->
+            <div class="field">
+              <label class="field-label">
+                <span>IMAGE ARTIFACT INGESTION</span>
+                <span class="req">MAX 5MB</span>
+              </label>
+
+              <div class="dropzone" id="dropzone">
+                <input type="file" id="documentFile" name="documentFile" class="dropzone-file" accept=".jpg,.jpeg,.png">
+                <svg class="icon icon-lg" style="margin-bottom: 8px; color: var(--accent);" viewBox="0 0 24 24">
+                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                  <path d="M12 12v9"/>
+                  <path d="m16 16-4-4-4 4"/>
+                </svg>
+                <div class="dropzone-main-text">SELECT ARTIFACT OR DROP IMAGE FILE</div>
+                <div class="dropzone-sub-text">RAW JPEG / PNG FORMATS • UP TO 4096px</div>
+              </div>
+
+              <!-- Image Preview Box -->
+              <div id="filePreview" class="file-preview hidden">
+                <img id="previewImg" class="file-preview-img" src="" alt="Artifact preview">
+                <div class="file-preview-meta">
+                  <div id="previewName" class="file-preview-name">filename.jpg</div>
+                  <div id="previewSize" class="file-preview-size">0 KB</div>
+                </div>
+                <button type="button" id="removeFileBtn" class="file-remove-btn" title="Remove artifact">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
             </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; margin-top: 8px;">
+              <svg class="icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="22" y1="12" x2="18" y2="12"/>
+                <line x1="6" y1="12" x2="2" y2="12"/>
+                <line x1="12" y1="6" x2="12" y2="2"/>
+                <line x1="12" y1="22" x2="12" y2="18"/>
+              </svg>
+              <span>EXECUTE FORENSIC SCREENING</span>
+            </button>
+          </form>
+
+          <div id="errorMessage" class="error-banner hidden"></div>
+        </div>
+      </section>
+
+      <!-- Right Column: Results Telemetry -->
+      <section class="console-panel" id="resultsSection">
+        <div class="panel-bar">
+          <div class="panel-heading">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            <span>TELEMETRY ASSESSMENT DISPLAY</span>
+          </div>
+          <span class="panel-meta" id="telemetryStatus">{% if status %}{{ status }}{% else %}AWAITING INGESTION{% endif %}</span>
+        </div>
+
+        <div class="panel-body">
+          <!-- Placeholder Empty State -->
+          <div id="resultPlaceholder" class="empty-state {% if status %}hidden{% endif %}">
+            <div class="empty-state-icon">
+              <svg class="icon icon-lg" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <div class="empty-state-title">SYSTEM IDLE — AWAITING DOCUMENT</div>
+            <p class="empty-state-desc">Submit document parameters and artifact image to execute deterministic OCR checks, JPEG recompression error analysis, and localized sharpness metrics.</p>
           </div>
 
-          <!-- Identity -->
-          <div class="result-card">
-            <h4>Identity Verification</h4>
-            <div class="result-row">
-              <span>Name Similarity</span>
-              <span id="nameSimilarity">--%</span>
+          <!-- Active Results Content -->
+          <div id="resultContent" class="{% if not status %}hidden{% endif %}">
+
+            <!-- Primary Risk Assessment Box -->
+            <div class="assessment-box">
+              <div class="assessment-top">
+                <span class="assessment-label">COMBINED SCREENING RISK INDEX</span>
+                <span id="riskLevel" class="risk-tag {% if risk_level %}{% if 'low' in risk_level.lower() %}tag-low{% elif 'high' in risk_level.lower() %}tag-high{% else %}tag-medium{% endif %}{% else %}tag-unknown{% endif %}">{{ risk_level if risk_level else '--' }}</span>
+              </div>
+
+              <div class="assessment-index">
+                <span id="riskScore" class="assessment-num">{{ risk_score if risk_score is defined else '0' }}</span>
+                <span class="assessment-scale">/ 100 RISK INDEX</span>
+              </div>
+
+              <div class="gauge-track">
+                <div id="riskMeterFill" class="gauge-bar {% if risk_level %}{% if 'low' in risk_level.lower() %}bar-low{% elif 'high' in risk_level.lower() %}bar-high{% else %}bar-medium{% endif %}{% endif %}" style="width: {{ risk_score if risk_score is defined else 0 }}%;"></div>
+              </div>
             </div>
-          </div>
 
-          <div class="result-card">
-            <h3>AI Visual Analysis</h3>
+            <!-- Recommended Next Step (Operational Directive) -->
+            <div class="directive-box {% if risk_level %}{% if 'low' in risk_level.lower() %}dir-low{% elif 'high' in risk_level.lower() %}dir-high{% else %}dir-medium{% endif %}{% endif %}" id="nextStepCard">
+              <div class="directive-title">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/></svg>
+                <span>OPERATIONAL DIRECTIVE (RECOMMENDED NEXT STEP)</span>
+              </div>
+              <p id="nextStepText" class="directive-text">{{ recommended_next_step if recommended_next_step else '--' }}</p>
+            </div>
 
-            <p>
-              <strong>Status:</strong>
-              <span id="aiStatus">-</span>
-            </p>
+            <!-- Screening Explanation -->
+            <div class="narrative-box" id="explanationCard">
+              <div class="narrative-title">FORENSIC &amp; RULE SCREENING EXPLANATION</div>
+              <p id="explanationText" class="narrative-text">{{ explanation if explanation else '--' }}</p>
+            </div>
 
-            <p>
-              <strong>Confidence:</strong>
-              <span id="aiConfidence">-</span>
-            </p>
+            <!-- Deterministic Rule Integrity & Identity Diagnostics -->
+            <div class="diag-group">
+              <div class="diag-header">
+                <span>IDENTITY &amp; RULE INTEGRITY (60% WEIGHT)</span>
+              </div>
 
-            <p>
-              <strong>AI Risk Score:</strong>
-              <span id="aiRiskScore">-</span>
-            </p>
+              <!-- Identity Section -->
+              <div class="diag-row">
+                <span class="diag-key">Claimed Full Name:</span>
+                <span class="diag-val mono" id="enteredNameDisplay">{{ name if name else '--' }}</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Detected Cardholder Name:</span>
+                <span class="diag-val mono" id="detectedNameDisplay">{{ detected_name if detected_name else '--' }}</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Identity Match Status:</span>
+                <span id="nameStatusBadge" class="badge-state {% if name_similarity is defined %}{% if name_similarity >= 85 %}state-ok{% elif name_similarity < 50 %}state-bad{% else %}state-neutral{% endif %}{% else %}state-neutral{% endif %}">
+                  {% if name_status %}{{ name_status }} ({{ name_similarity }}%){% elif name_similarity is defined %}{{ name_similarity }}% Match{% else %}--{% endif %}
+                </span>
+              </div>
 
-            <h4>Detected Indicators</h4>
+              <!-- Document Number Section -->
+              <div class="diag-row">
+                <span class="diag-key">Claimed Identifier:</span>
+                <span class="diag-val mono" id="enteredNumber">{{ document if document else '--' }}</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Extracted Identifier:</span>
+                <span class="diag-val mono" id="detectedNumber">{{ extracted_document if extracted_document else '--' }}</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Exact Match Check:</span>
+                <span id="numberMatch" class="badge-state {% if document_status is defined %}{% if document_status == True %}state-ok{% elif document_status == False %}state-bad{% else %}state-neutral{% endif %}{% else %}state-neutral{% endif %}">{{ 'Match' if document_status == True else ('Mismatch' if document_status == False else '--') }}</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Syntax Verification (Regex):</span>
+                <span id="formatValid" class="badge-state {% if document_format_valid is defined %}{% if document_format_valid == True %}state-ok{% elif document_format_valid == False %}state-bad{% else %}state-neutral{% endif %}{% else %}state-neutral{% endif %}">{{ 'Valid Format' if document_format_valid == True else ('Invalid Format' if document_format_valid == False else '--') }}</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Checksum / Structural Rule:</span>
+                <span id="checksumValid" class="badge-state {% if checksum_valid is defined and not checksum_valid %}state-bad{% else %}state-ok{% endif %}">
+                  {% if checksum_valid is defined and not checksum_valid %}Checksum Failed{% else %}Verified / Standard{% endif %}
+                </span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-key">Regulatory Authority Headers:</span>
+                <span id="authorityValid" class="badge-state {% if authority_valid is defined and not authority_valid %}state-bad{% else %}state-ok{% endif %}">
+                  {% if authority_valid is defined and not authority_valid %}Missing Headers{% else %}Headers Verified{% endif %}
+                </span>
+              </div>
+            </div>
 
-            <ul id="aiReasons">
-              <li>No analysis available.</li>
-            </ul>
+            <!-- OpenCV Image Forensics Diagnostics -->
+            <div class="diag-group" id="forensicsCard">
+              <div class="diag-header">
+                <span>OPENCV ARTIFACT FORENSICS (40% WEIGHT)</span>
+                <span id="forensicStatus" class="badge-state {% if forensic_analysis is defined %}{% if forensic_analysis.suspicious %}state-bad{% else %}state-ok{% endif %}{% else %}state-neutral{% endif %}">{{ 'Anomaly Detected' if (forensic_analysis is defined and forensic_analysis.suspicious) else ('Normal / Clean' if (forensic_analysis is defined and not forensic_analysis.suspicious) else '--') }}</span>
+              </div>
+
+              <div class="diag-row">
+                <span class="diag-key">Tampering Anomaly Index:</span>
+                <span class="diag-val mono" id="forensicRiskScore">{{ forensic_analysis.risk_score if forensic_analysis is defined else '--' }} / 100</span>
+              </div>
+
+              <div class="diag-row">
+                <span class="diag-key">Confidence Coefficient:</span>
+                <span class="diag-val mono" id="forensicConfidence">{{ (forensic_analysis.confidence * 100)|round|int if (forensic_analysis is defined and forensic_analysis.confidence is defined) else '--' }}%</span>
+              </div>
+
+              <div class="diag-row">
+                <span class="diag-key">Digital Editor Footprint:</span>
+                <span class="diag-val mono" id="metadataSoftware">{{ forensic_analysis.metrics.software_detected if (forensic_analysis is defined and forensic_analysis.metrics and forensic_analysis.metrics.software_detected) else 'Clean / None' }}</span>
+              </div>
+
+              <div style="padding: 10px 16px 4px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase;">FLAGGED ANOMALIES &amp; INDICATORS:</div>
+              <ul id="forensicIndicators" class="indicators-list">
+                {% if forensic_analysis is defined and forensic_analysis.indicators %}
+                  {% for ind in forensic_analysis.indicators %}
+                    <li>{{ ind }}</li>
+                  {% endfor %}
+                {% else %}
+                  <li>No compression anomalies or digital tampering signatures detected.</li>
+                {% endif %}
+              </ul>
+
+              <!-- 4 Forensic Metrics Matrix -->
+              <div class="metrics-row">
+                <div class="metric-cell">
+                  <span class="metric-cell-label">ELA SCORE</span>
+                  <span class="metric-cell-val" id="metricEla">{{ forensic_analysis.metrics.ela_score if (forensic_analysis is defined and forensic_analysis.metrics) else '--' }}</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">SHARPNESS VAR</span>
+                  <span class="metric-cell-val" id="metricSharpness">{{ forensic_analysis.metrics.sharpness_variance if (forensic_analysis is defined and forensic_analysis.metrics) else '--' }}</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">ASPECT RATIO</span>
+                  <span class="metric-cell-val" id="metricAspectRatio">{{ forensic_analysis.metrics.aspect_ratio if (forensic_analysis is defined and forensic_analysis.metrics) else '--' }}</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">RESOLUTION</span>
+                  <span class="metric-cell-val" id="metricResolution">{{ forensic_analysis.metrics.resolution if (forensic_analysis is defined and forensic_analysis.metrics) else '--' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Disclaimer Bar -->
+            <div class="disclaimer-bar">
+              <strong>TECHNICAL NOTICE:</strong> VeriScan is an algorithmic preliminary screening system built for Smart India Hackathon. It performs client-free local pixel forensics &amp; OCR parsing. It does not interface with government databases and does not certify absolute document authenticity.
+            </div>
           </div>
         </div>
       </section>
     </div>
   </main>
 
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loading-overlay hidden">
-    <div class="spinner"></div>
-    <p>Verifying document…</p>
+  <!-- Loading Modal -->
+  <div id="loadingOverlay" class="loading-modal hidden">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div class="loading-text">ANALYZING DOCUMENT ARTIFACT</div>
+      <div class="loading-subtext">Computing ELA matrix, Laplacian variance &amp; OCR...</div>
+    </div>
   </div>
 
-  <script src="{{ url_for('static', filename='js/verify.js') }}"></script>
+  <!-- Console Footer -->
+  <footer>
+    <div class="container footer-inner">
+      <div>&copy; 2026 VeriScan Console • Team VibexLeapers • Smart India Hackathon MVP</div>
+      <div class="mono" style="font-size: 11px; color: var(--text-dim);">STATELESS IN-MEMORY PIPELINE • ZERO PERSISTENT DATABASE</div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/verify.js') }}?v=4.0"></script>
 </body>
 
 </html>

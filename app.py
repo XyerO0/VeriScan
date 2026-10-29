@@ -1,11 +1,17 @@
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
-from ai_detector import analyze_document_with_ai
+from forensics import analyze_document_forensics
 
 import os
 import uuid
 
-from utils import process_document, calculate_combined_risk, get_combined_risk_level
+from utils import (
+    process_document,
+    calculate_combined_risk,
+    get_combined_risk_level,
+    generate_explanation,
+    get_recommended_next_step
+)
 
 
 app = Flask(__name__)
@@ -16,6 +22,8 @@ app = Flask(__name__)
 # =========================================================
 
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 UPLOAD_FOLDER = "uploads"
 
@@ -24,6 +32,14 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
+
+
+@app.after_request
+def add_cache_control_headers(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 # =========================================================
@@ -205,29 +221,65 @@ def verify():
 
 
         # -----------------------------------------
-        # AI visual analysis
+        # Image Forensics analysis (OpenCV + PIL)
         # -----------------------------------------
 
         try:
-
-            ai_result = analyze_document_with_ai(
+            forensic_result = analyze_document_forensics(
                 filepath,
                 docType
             )
 
         except Exception as e:
+            print("Forensic analysis error:", e)
 
-            print("AI analysis error:", e)
-
-            ai_result = {
-                "Status": "unavailable",
-                "suspicious": None,
+            forensic_result = {
+                "status": "error",
+                "suspicious": False,
                 "confidence": 0,
                 "risk_score": 0,
-                "reasons": [
-                    "AI analysis was unavailable"
-                ]
+                "indicators": ["Forensic analysis encountered an unexpected error"],
+                "metrics": {
+                    "ela_score": 0,
+                    "sharpness_variance": 0,
+                    "aspect_ratio": 0,
+                    "resolution": "unknown",
+                    "software_detected": None
+                }
             }
+
+
+        # -----------------------------------------
+        # Combined Risk & Screening Assessment
+        # -----------------------------------------
+
+        rule_risk = result["risk"]["score"]
+        forensic_risk = forensic_result["risk_score"]
+        name_similarity = result["identity"]["name_similarity"]
+        number_match = result["document"]["number_match"]
+        format_valid = result["document"]["format_valid"]
+
+        combined_risk = calculate_combined_risk(
+            rule_risk,
+            forensic_risk,
+            name_similarity=name_similarity,
+            number_match=number_match,
+            format_valid=format_valid
+        )
+        final_risk_score = combined_risk
+        final_risk_level = get_combined_risk_level(combined_risk)
+
+        explanation = generate_explanation(
+            result,
+            forensic_result,
+            final_risk_level
+        )
+
+        recommended_next_step = get_recommended_next_step(
+            final_risk_level,
+            name_similarity=name_similarity,
+            number_match=number_match
+        )
 
 
         # -----------------------------------------
@@ -249,15 +301,27 @@ def verify():
 
             document_status=result["document"]["number_match"],
 
+            detected_name=result["identity"].get("detected_name"),
+
+            name_status=result["identity"].get("name_status"),
+
             name_similarity=result["identity"]["name_similarity"],
 
             document_format_valid=result["document"]["format_valid"],
 
-            risk_score=result["risk"]["score"],
+            authority_valid=result["document"].get("authority_valid", True),
 
-            risk_level=result["risk"]["level"],
+            checksum_valid=result["document"].get("checksum_valid", True),
 
-            ai_analysis=ai_result,
+            risk_score=final_risk_score,
+
+            risk_level=final_risk_level,
+
+            forensic_analysis=forensic_result,
+
+            explanation=explanation,
+
+            recommended_next_step=recommended_next_step,
 
             status="Analysis Complete"
         )
@@ -390,70 +454,91 @@ def api_verify():
 
 
         # -----------------------------------------
-        # AI visual analysis
+        # Image Forensics analysis (OpenCV + PIL)
         # -----------------------------------------
 
         try:
-
-            ai_result = analyze_document_with_ai(
+            forensic_result = analyze_document_forensics(
                 filepath,
                 docType
             )
 
         except Exception as e:
+            print("Forensic analysis error:", e)
 
-            print("AI analysis error:", e)
-
-            ai_result = {
-                "Status": "unavailable",
-                "suspicious": None,
+            forensic_result = {
+                "status": "error",
+                "suspicious": False,
                 "confidence": 0,
                 "risk_score": 0,
-                "reasons": [
-                    "AI analysis was unavailable"
-                ]
+                "indicators": ["Forensic analysis encountered an unexpected error"],
+                "metrics": {
+                    "ela_score": 0,
+                    "sharpness_variance": 0,
+                    "aspect_ratio": 0,
+                    "resolution": "unknown",
+                    "software_detected": None
+                }
             }
 
 
         # -----------------------------------------
-        # Add AI result to existing result
+        # Add Forensics result to existing result
         # -----------------------------------------
 
+        result["forensic_analysis"] = forensic_result
+
+        # Backwards compatibility alias for consumers expecting ai_analysis
         result["ai_analysis"] = {
-
-            "suspicious": ai_result["suspicious"],
-
-            "confidence": ai_result["confidence"],
-
-            "risk_score": ai_result["risk_score"],
-
-            "reasons": ai_result["reasons"]
+            "status": "replaced_by_forensics",
+            "suspicious": forensic_result["suspicious"],
+            "confidence": forensic_result["confidence"],
+            "risk_score": forensic_result["risk_score"],
+            "reasons": forensic_result["indicators"]
         }
 
         rule_risk = result["risk"]["score"]
+        forensic_risk = forensic_result["risk_score"]
+        name_similarity = result["identity"]["name_similarity"]
+        number_match = result["document"]["number_match"]
+        format_valid = result["document"]["format_valid"]
 
-        if ai_result.get("status") == "available":
-            ai_risk = ai_result["risk_score"]
+        combined_risk = calculate_combined_risk(
+            rule_risk,
+            forensic_risk,
+            name_similarity=name_similarity,
+            number_match=number_match,
+            format_valid=format_valid
+        )
 
-            combined_risk = calculate_combined_risk(
-                rule_risk,
-                ai_risk
-            )
-
-            final_risk = {
-                "score": combined_risk,
-                "level": get_combined_risk_level(combined_risk),
-                "ai_included": True
-            }
-
-        else:
-            final_risk = {
-                "score": rule_risk,
-                "level": result["risk"]["level"],
-                "ai_included": False
-            }
+        final_risk = {
+            "score": combined_risk,
+            "level": get_combined_risk_level(combined_risk),
+            "forensics_included": True
+        }
 
         result["final_risk"] = final_risk
+
+        # -----------------------------------------
+        # Generate Explanation & Recommended Next Step
+        # -----------------------------------------
+
+        explanation = generate_explanation(
+            result,
+            forensic_result,
+            final_risk["level"]
+        )
+
+        recommended_next_step = get_recommended_next_step(
+            final_risk["level"],
+            name_similarity=name_similarity,
+            number_match=number_match
+        )
+
+        result["explanation"] = explanation
+        result["recommended_next_step"] = recommended_next_step
+        final_risk["explanation"] = explanation
+        final_risk["recommended_next_step"] = recommended_next_step
 
 
         # -----------------------------------------
